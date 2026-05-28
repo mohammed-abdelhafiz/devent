@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import LightRays from "@/components/LightRays";
 import { Navbar } from "@/components/Navbar";
+import { PostHogProvider } from "@/components/providers/PostHogProvider";
 
 const schibstedGrotesk = Schibsted_Grotesk({
   variable: "--font-schibsted-grotesk",
@@ -35,21 +36,23 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-screen">
-        <div className="absolute inset-0 z-[-1]">
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#7ccf00"
-            raysSpeed={0.5}
-            lightSpread={0.9}
-            rayLength={1.4}
-            followMouse={true}
-            mouseInfluence={0.08}
-            noiseAmount={0.0}
-            distortion={0.01}
-          />
-        </div>
-        <Navbar />
-        <main>{children}</main>
+        <PostHogProvider>
+          <div className="absolute inset-0 z-[-1]">
+            <LightRays
+              raysOrigin="top-center"
+              raysColor="#7ccf00"
+              raysSpeed={0.5}
+              lightSpread={0.9}
+              rayLength={1.4}
+              followMouse={true}
+              mouseInfluence={0.08}
+              noiseAmount={0.0}
+              distortion={0.01}
+            />
+          </div>
+          <Navbar />
+          <main>{children}</main>
+        </PostHogProvider>
       </body>
     </html>
   );
