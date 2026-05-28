@@ -3,13 +3,18 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  images: {
-    remotePatterns: [
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [
       {
-        protocol: "https",
-        hostname: "i.pravatar.cc",
+        source: "/ingest/static/:path*",
+        destination: "https://assets.eu.i.posthog.com/static/:path*",
       },
-    ],
+      {
+        source: "/ingest/:path*",
+        destination: "https://eu.i.posthog.com/:path*",
+      },
+    ];
   },
 };
 

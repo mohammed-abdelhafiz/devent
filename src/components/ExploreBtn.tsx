@@ -15,7 +15,7 @@ export const ExploreBtn = () => {
       )}
     >
       Explore Events
-      <ArrowDown className="ml-1" />
+      <ArrowDown className="size-5 animate-pulse" />
     </Link>
   );
 };
