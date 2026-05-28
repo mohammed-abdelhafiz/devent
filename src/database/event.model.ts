@@ -98,12 +98,29 @@ function createSlug(value: string): string {
 }
 
 function normalizeDateToIso(value: string): string {
-  const parsed = new Date(value)
+  const trimmed = value.trim()
+  const isoDateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  const isoDateTimeMatch = trimmed.match(
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/
+  )
 
-  if (Number.isNaN(parsed.getTime())) {
-    throw new Error("Invalid event date format.")
+  if (isoDateOnlyMatch) {
+    // Normalize a date-only input to midnight UTC ISO.
+    const parsedDateOnly = new Date(`${trimmed}T00:00:00.000Z`)
+    if (Number.isNaN(parsedDateOnly.getTime())) {
+      throw new Error("Invalid event date format. Use ISO date or ISO datetime.")
+    }
+    return parsedDateOnly.toISOString()
   }
 
+  if (!isoDateTimeMatch) {
+    throw new Error("Invalid event date format. Use ISO date or ISO datetime.")
+  }
+
+  const parsed = new Date(trimmed)
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error("Invalid event date format. Use ISO date or ISO datetime.")
+  }
   return parsed.toISOString()
 }
 
@@ -134,6 +151,14 @@ function normalizeTime(value: string): string {
   return `${String(normalizedHour).padStart(2, "0")}:${minute}`
 }
 
+eventSchema.pre("validate", function () {
+  const event = this as EventDocument
+
+  // Generate slug before schema validation so required slug is present.
+  if (event.isModified("title")) {
+    event.slug = createSlug(event.title)
+  }
+})
 eventSchema.pre("save", function () {
   const event = this as EventDocument
 
@@ -157,10 +182,6 @@ eventSchema.pre("save", function () {
     throw new Error("Tags must contain at least one non-empty item.")
   }
 
-  // Regenerate the slug only when title is new/changed.
-  if (event.isModified("title")) {
-    event.slug = createSlug(event.title)
-  }
 
   try {
     // Store date as ISO and time as HH:mm for consistent querying/display.
