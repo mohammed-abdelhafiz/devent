@@ -53,4 +53,7 @@ bookingSchema.pre("save", async function () {
 
 bookingSchema.index({ eventId: 1 })
 
+// Add a unique index for each event to ensure only one booking per email per event.
+bookingSchema.index({ eventId: 1, email: 1 }, { unique: true })
+
 export const Booking = models.Booking || model<IBooking>("Booking", bookingSchema)
